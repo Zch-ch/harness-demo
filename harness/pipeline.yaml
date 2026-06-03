@@ -1,0 +1,65 @@
+pipeline:
+  name: Harness Demo Pipeline
+  identifier: harness_demo_pipeline
+  projectIdentifier: default_project
+  orgIdentifier: default_org
+  
+  stages:
+    - stage:
+        name: Build
+        identifier: build_stage
+        description: 构建阶段
+        type: CI
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Install Dependencies
+                  identifier: install_deps
+                  spec:
+                    shell: Bash
+                    command: npm install
+              - step:
+                  type: Run
+                  name: Run Tests
+                  identifier: run_tests
+                  spec:
+                    shell: Bash
+                    command: npm test
+              - step:
+                  type: Run
+                  name: Build Docker Image
+                  identifier: build_docker
+                  spec:
+                    shell: Bash
+                    command: |
+                      docker build -t harness-demo:v1.0 .
+                      echo "Docker image built successfully"
+    
+    - stage:
+        name: Deploy to Dev
+        identifier: deploy_dev
+        description: 部署到开发环境
+        type: Deployment
+        spec:
+          deploymentType: Kubernetes
+          service:
+            serviceRef: harness_demo_service
+          environment:
+            environmentRef: dev_env
+          infrastructure:
+            infrastructureDefinition:
+              type: KubernetesDirect
+              spec:
+                connectorRef: k8s_connector
+          execution:
+            steps:
+              - step:
+                  type: Deployment
+                  name: Deploy Service
+                  identifier: deploy_service
+                  timeout: 10m
+                  spec:
+                    deploymentType: Kubernetes
+                    strategy: Rolling
