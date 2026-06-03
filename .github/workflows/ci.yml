@@ -1,0 +1,42 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: 设置 Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 安装依赖
+      run: npm ci
+    
+    - name: 运行测试
+      run: npm test
+    
+    - name: 构建 Docker 镜像
+      run: |
+        docker build -t harness-demo:${{ github.sha }} .
+        docker tag harness-demo:${{ github.sha }} harness-demo:latest
+    
+    - name: 上传构建信息
+      run: |
+        echo "Build completed: ${{ github.sha }}" > build-info.txt
+        echo "Build time: $(date)" >> build-info.txt
+    
+    - name: 上传制品
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: build-info.txt
