@@ -1,4 +1,4 @@
-# local test
+# Local test
 git clone https://github.com/Zch-ch/harness-demo.git
 cd harness-demo
 npm install
