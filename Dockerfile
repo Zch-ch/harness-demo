@@ -1,5 +1,5 @@
 # 构建阶段
-FROM node:18-alpine AS builder
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # 运行阶段
-FROM node:18-alpine
+FROM node:18-slim
 
 WORKDIR /app
 
